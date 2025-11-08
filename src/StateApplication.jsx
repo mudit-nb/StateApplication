@@ -115,6 +115,9 @@ export default function LocationSelector() {
             </option>
           ))}
       </select>
+      <p>
+        You selected {selectCity}, {selectState}, {selectCountry}
+      </p>
     </div>
   );
 }
