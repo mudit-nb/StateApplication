@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 
+import "./styles.css";
+
 const API_ENDPOINT = "https://location-selector.labs.crio.do/countries";
 
 export default function LocationSelector() {
@@ -11,13 +13,18 @@ export default function LocationSelector() {
   const [selectCity, setSelectCity] = useState("");
   const [cityOption, setCityOption] = useState([]);
   const [isSelectCity, setisSelectCity] = useState(false);
+  const [error, setError] = useState(null);
+  const premove = document.getElementById("premoval");
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch(API_ENDPOINT);
         const jsonRes = await res.json();
         setcountryOption(jsonRes);
-      } catch (e) {}
+      } catch (e) {
+        setError("Error loading countries. Please try again later.");
+        setcountryOption([]);
+      }
     };
     fetchData();
   }, []);
@@ -32,7 +39,11 @@ export default function LocationSelector() {
           const jsonRes = await res.json();
           console.log(jsonRes);
           setStateOption(jsonRes);
-        } catch (e) {}
+        } catch (e) {
+          setError(`Error loading states for ${selectCountry}.`);
+          setStateOption([]);
+          setisSelectState(false);
+        }
       };
       fetchData();
     }
@@ -48,11 +59,24 @@ export default function LocationSelector() {
           const jsonRes = await res.json();
           console.log(jsonRes);
           setCityOption(jsonRes);
-        } catch (e) {}
+        } catch (e) {
+          setError(`Error loading cities for ${selectState}.`);
+          setCityOption([]);
+          setisSelectCity(false);
+        }
       };
       fetchData();
     }
   }, [selectState]);
+
+  useEffect(() => {
+    if (selectCity) {
+      const removeHide = () => {
+        premove.classList.remove("hide");
+      };
+      removeHide();
+    }
+  }, [selectCity]);
 
   const handleCountryChange = (selectCountry) => {
     setselectCountry(selectCountry);
@@ -72,6 +96,7 @@ export default function LocationSelector() {
   return (
     <div>
       <h1>Select Location</h1>
+      {error && <p style={{ color: "red", fontWeight: "bold" }}>{error}</p>}
       <select
         onChange={(e) => handleCountryChange(e.target.value)}
         value={selectCountry}
@@ -115,7 +140,8 @@ export default function LocationSelector() {
             </option>
           ))}
       </select>
-      <p>
+
+      <p id="premoval" className="hide">
         You selected {selectCity}, {selectState}, {selectCountry}
       </p>
     </div>
